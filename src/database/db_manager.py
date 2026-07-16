@@ -29,7 +29,7 @@ class DatabaseManager:
     
     def add_application(self, company_name, job_title, job_url=None, status=None, 
                        salary_range=None, location=None, contact_name=None, 
-                       contact_email=None, contact_phone=None, notes=None):
+                       contact_email=None, contact_phone=None, notes=None, user_id=None):
         """Add a new job application."""
         session = self.get_session()
         try:
@@ -44,7 +44,8 @@ class DatabaseManager:
                 contact_name=contact_name,
                 contact_email=contact_email,
                 contact_phone=contact_phone,
-                notes=notes
+                notes=notes,
+                user_id=user_id
             )
             session.add(app)
             session.commit()

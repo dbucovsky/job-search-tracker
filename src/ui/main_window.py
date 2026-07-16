@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(tab_widget)
         
         # Create Job Detail Dialog
-        self.job_detail_view = JobDetailView(self.db_manager)
+        self.job_detail_view = JobDetailView(self.db_manager, self.user_id)
         self.job_detail_view.application_updated.connect(self.on_detail_updated)
         
         central_widget.setLayout(main_layout)

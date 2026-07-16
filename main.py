@@ -16,14 +16,10 @@ def main():
     # Create Qt application
     app = QApplication(sys.argv)
     
-    # Show login dialog
+    # Create login dialog
     login_dialog = LoginDialog(db_manager)
-    if login_dialog.exec_() != LoginDialog.Accepted:
-        # User cancelled login
-        sys.exit(0)
     
-    # Get logged in user info (emitted by login_dialog signal)
-    # We need to store it from the signal
+    # Store user info from signal
     user_id = None
     username = None
     
@@ -32,7 +28,13 @@ def main():
         user_id = uid
         username = uname
     
+    # Connect signal BEFORE showing dialog
     login_dialog.user_logged_in.connect(on_user_logged_in)
+    
+    # Show login dialog and wait for response
+    if login_dialog.exec_() != LoginDialog.Accepted:
+        # User cancelled login
+        sys.exit(0)
     
     # Create main window with user context
     window = MainWindow(db_manager, user_id, username)

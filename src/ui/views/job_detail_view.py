@@ -12,9 +12,10 @@ class JobDetailView(QDialog):
     
     application_updated = pyqtSignal()
     
-    def __init__(self, db_manager):
+    def __init__(self, db_manager, user_id=None):
         super().__init__()
         self.db_manager = db_manager
+        self.user_id = user_id
         self.current_app_id = None
         self.setWindowTitle("Job Details")
         self.setGeometry(100, 100, 500, 700)
@@ -174,7 +175,8 @@ class JobDetailView(QDialog):
                 contact_name=self.contact_name_input.text(),
                 contact_email=self.contact_email_input.text(),
                 contact_phone=self.contact_phone_input.text(),
-                notes=self.notes_input.toPlainText()
+                notes=self.notes_input.toPlainText(),
+                user_id=self.user_id
             )
         
         self.application_updated.emit()
