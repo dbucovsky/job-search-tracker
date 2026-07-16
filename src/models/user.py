@@ -3,10 +3,8 @@ User model for authentication and user management.
 """
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 import hashlib
-
-Base = declarative_base()
+from src.models.job_application import Base
 
 
 class User(Base):
