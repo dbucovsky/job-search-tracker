@@ -1,4 +1,38 @@
 # Job Search Tracker - Version History
+## [0.5.10] - 2026-07-16 16:15
+
+### Features Added
+- Added About menu with app information
+- About dialog shows app name, version, last update date/time, and features list
+
+### Bug Fixes
+- Fixed Kanban drag-and-drop opening detail popup with hybrid state machine + cooldown
+- Added post-drag 200ms cooldown to block synthetic click events
+- State machine ensures clicks only from true PRESSED→IDLE transitions
+
+### Notes
+- Version numbering corrected: bug fixes increment Z (0.5.10 not 0.6.0)
+- Hybrid approach: state machine + post-drag cooldown = maximum robustness
+- About menu accessible from Help menu in main window
+
+---
+## [0.5.10] - 2026-07-16 16:15
+
+### Features Added
+- Added About menu with app information
+- About dialog shows app name, version, last update date/time, and features list
+
+### Bug Fixes
+- Fixed Kanban drag-and-drop opening detail popup with hybrid state machine + cooldown
+- Added post-drag 200ms cooldown to block synthetic click events
+- State machine ensures clicks only from true PRESSED→IDLE transitions
+
+### Notes
+- Version numbering corrected: bug fixes increment Z (0.5.10 not 0.6.0)
+- Hybrid approach: state machine + post-drag cooldown = maximum robustness
+- About menu accessible from Help menu in main window
+
+---
 
 ## [0.6.0] - 2026-07-16 16:10
 
@@ -289,7 +323,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.6.0
+- **Latest Version**: 0.5.10
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 

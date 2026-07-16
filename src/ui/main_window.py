@@ -1,12 +1,13 @@
 """
 Main window for the Job Search Tracker application.
 """
-from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTabWidget
+from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTabWidget, QMenuBar, QMenu
 from PyQt5.QtCore import Qt
 from src.ui.views.table_view import TableView
 from src.ui.views.calendar_view import CalendarView
 from src.ui.views.kanban_view import KanbanView
 from src.ui.views.job_detail_view import JobDetailView
+from src.ui.about_dialog import AboutDialog
 
 
 class MainWindow(QMainWindow):
@@ -22,6 +23,12 @@ class MainWindow(QMainWindow):
         """Initialize main window UI."""
         self.setWindowTitle("Job Search Tracker")
         self.setGeometry(100, 100, 1000, 800)
+        
+        # Create menu bar
+        menubar = self.menuBar()
+        help_menu = menubar.addMenu("Help")
+        about_action = help_menu.addAction("About")
+        about_action.triggered.connect(self.on_about)
         
         # Central widget
         central_widget = QWidget()
@@ -97,3 +104,8 @@ class MainWindow(QMainWindow):
             self.kanban_view.refresh()
         except Exception as e:
             print(f"Error refreshing kanban view: {e}")
+    
+    def on_about(self):
+        """Handle About menu action."""
+        about_dialog = AboutDialog(self)
+        about_dialog.exec_()

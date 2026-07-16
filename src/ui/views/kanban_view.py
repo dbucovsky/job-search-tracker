@@ -25,8 +25,13 @@ class KanbanCard(QFrame):
         self.location = location
         self.state = self.STATE_IDLE
         self.press_pos = None
+        self.just_dragged = False  # Flag to block clicks right after drag
+        self.drag_cooldown = QTimer()
+        self.drag_cooldown.setSingleShot(True)
+        self.drag_cooldown.timeout.connect(lambda: setattr(self, 'just_dragged', False))
         self.setStyleSheet("border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px; background-color: #f9f9f9;")
         self.setCursor(Qt.OpenHandCursor)
+        self.setAcceptDrops(False)  # Only drag, not drop
         self.init_ui()
     
     def init_ui(self):
@@ -64,11 +69,13 @@ class KanbanCard(QFrame):
         
         # Only handle if we're in PRESSED state (haven't started drag yet)
         if self.state != self.STATE_PRESSED or self.press_pos is None:
+            event.accept()
             return
         
         # Check if movement is large enough to be a drag
         movement = (event.pos() - self.press_pos).manhattanLength()
         if movement < 5:
+            event.accept()
             return
         
         # Transition to DRAGGING state
@@ -82,15 +89,18 @@ class KanbanCard(QFrame):
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
         
-        # After drag completes, reset to IDLE
+        # After drag completes, set just_dragged flag and reset state
+        self.just_dragged = True
+        self.drag_cooldown.start(200)  # 200ms cooldown
         self.state = self.STATE_IDLE
         self.press_pos = None
+        event.accept()
     
     def mouseReleaseEvent(self, event):
-        """Handle mouse release - only emit click if we're still in PRESSED state."""
+        """Handle mouse release - only emit click if not dragging and not in cooldown."""
         if event.button() == Qt.LeftButton:
-            # Only emit click if we never transitioned to DRAGGING
-            if self.state == self.STATE_PRESSED and self.press_pos is not None:
+            # Don't emit click if we just dragged or are in cooldown
+            if not self.just_dragged and self.state == self.STATE_PRESSED and self.press_pos is not None:
                 # Verify position hasn't moved far
                 movement = (event.pos() - self.press_pos).manhattanLength()
                 if movement < 10:
