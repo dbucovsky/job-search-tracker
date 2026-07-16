@@ -1,6 +1,30 @@
 # Job Search Tracker - Version History
 
-## [0.7.2] - 2026-07-16 16:40
+## [0.7.4] - 2026-07-16 16:50
+
+### Features Added
+- User-specific data filtering in all views
+- Database queries now accept optional user_id parameter
+- All views properly filter applications by current user
+
+### Bug Fixes
+- Fixed data leakage between users (all users could see all applications)
+- All views now receive and use user_id during initialization
+- Multi-user isolation now complete and enforced
+
+### Known Issues
+- **Kanban drag-and-drop**: Dragging cards still opens detail popup in some cases
+  - Workaround: Use Table or Calendar view to edit applications
+  - Will be fixed in a future version with alternative UI approach
+
+### Notes
+- Each user sees only their own applications across all views
+- Database queries enforce user_id filtering
+- No data visible between different user accounts
+
+---
+
+## [0.7.3] - 2026-07-16 16:45
 
 ### Features Added
 - N/A
@@ -412,7 +436,8 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.7.2
-- **Stability**: Stable - All core features working correctly
+- **Latest Version**: 0.7.4
+- **Stability**: Stable - Multi-user support fully functional
+- **Data Isolation**: Complete - each user sees only their own data
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 
