@@ -1,0 +1,5 @@
+PyQt5==5.15.9
+PyQt5-sip==12.13.0
+SQLAlchemy==2.0.23
+python-dateutil==2.8.2
+pytz==2023.3

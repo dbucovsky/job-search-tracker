@@ -1,0 +1,114 @@
+"""
+Database manager for job tracking application.
+"""
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from src.models.job_application import Base, JobApplication
+
+
+class DatabaseManager:
+    """Manages database connections and operations."""
+    
+    def __init__(self, db_path="data/job_tracker.db"):
+        """Initialize database manager with SQLite database."""
+        os.makedirs(os.path.dirname(db_path) if os.path.dirname(db_path) else ".", exist_ok=True)
+        self.db_url = f"sqlite:///{os.path.abspath(db_path)}"
+        self.engine = create_engine(self.db_url, echo=False)
+        self.Session = sessionmaker(bind=self.engine)
+        self.init_db()
+    
+    def init_db(self):
+        """Initialize database schema."""
+        Base.metadata.create_all(self.engine)
+    
+    def get_session(self):
+        """Get a new database session."""
+        return self.Session()
+    
+    def add_application(self, company_name, job_title, job_url=None, status=None, 
+                       salary_range=None, location=None, contact_name=None, 
+                       contact_email=None, contact_phone=None, notes=None):
+        """Add a new job application."""
+        session = self.get_session()
+        try:
+            from src.models.job_application import ApplicationStatus
+            app = JobApplication(
+                company_name=company_name,
+                job_title=job_title,
+                job_url=job_url,
+                status=status or ApplicationStatus.IDENTIFIED,
+                salary_range=salary_range,
+                location=location,
+                contact_name=contact_name,
+                contact_email=contact_email,
+                contact_phone=contact_phone,
+                notes=notes
+            )
+            session.add(app)
+            session.commit()
+            return app
+        finally:
+            session.close()
+    
+    def get_all_applications(self):
+        """Get all job applications (including archived)."""
+        session = self.get_session()
+        try:
+            return session.query(JobApplication).all()
+        finally:
+            session.close()
+    
+    def get_active_applications(self):
+        """Get only active (non-archived) job applications."""
+        session = self.get_session()
+        try:
+            return session.query(JobApplication).filter(JobApplication.is_archived == False).all()
+        finally:
+            session.close()
+    
+    def get_application_by_id(self, app_id):
+        """Get a specific job application by ID."""
+        session = self.get_session()
+        try:
+            return session.query(JobApplication).filter(JobApplication.id == app_id).first()
+        finally:
+            session.close()
+    
+    def update_application(self, app_id, **kwargs):
+        """Update a job application."""
+        session = self.get_session()
+        try:
+            app = session.query(JobApplication).filter(JobApplication.id == app_id).first()
+            if app:
+                for key, value in kwargs.items():
+                    if hasattr(app, key):
+                        setattr(app, key, value)
+                session.commit()
+            return app
+        finally:
+            session.close()
+    
+    def delete_application(self, app_id):
+        """Delete a job application."""
+        session = self.get_session()
+        try:
+            app = session.query(JobApplication).filter(JobApplication.id == app_id).first()
+            if app:
+                session.delete(app)
+                session.commit()
+                return True
+            return False
+        finally:
+            session.close()
+    
+    def get_applications_by_status(self, status, archived=False):
+        """Get applications filtered by status and archive status."""
+        session = self.get_session()
+        try:
+            return session.query(JobApplication).filter(
+                JobApplication.status == status,
+                JobApplication.is_archived == archived
+            ).all()
+        finally:
+            session.close()
