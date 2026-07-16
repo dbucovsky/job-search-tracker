@@ -15,9 +15,10 @@ class CalendarView(QWidget):
     deselect_requested = pyqtSignal()  # Signal to deselect current application
     new_record_requested = pyqtSignal()  # Signal to create new record
     
-    def __init__(self, db_manager):
+    def __init__(self, db_manager, user_id=None):
         super().__init__()
         self.db_manager = db_manager
+        self.user_id = user_id
         self.marked_dates = {}  # Track marked dates for highlighting
         self.init_ui()
     
@@ -59,7 +60,7 @@ class CalendarView(QWidget):
     def refresh_highlighting(self):
         """Refresh highlights without clearing list (internal use only)."""
         try:
-            applications = self.db_manager.get_all_applications()
+            applications = self.db_manager.get_all_applications(user_id=self.user_id)
             today_date = QDate.currentDate()
             self.marked_dates = {}  # Reset marked dates
             

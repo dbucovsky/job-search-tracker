@@ -189,9 +189,10 @@ class KanbanView(QWidget):
     application_updated = pyqtSignal()  # Signal when application status changes
     new_record_requested = pyqtSignal()  # Signal to create new record
     
-    def __init__(self, db_manager):
+    def __init__(self, db_manager, user_id=None):
         super().__init__()
         self.db_manager = db_manager
+        self.user_id = user_id
         self.layout_widget = None
         self.columns = []  # Track column references
         self.init_ui()
@@ -239,7 +240,7 @@ class KanbanView(QWidget):
             for status in ApplicationStatus:
                 try:
                     # Get active applications for this status (not archived)
-                    applications = self.db_manager.get_applications_by_status(status, archived=False)
+                    applications = self.db_manager.get_applications_by_status(status, archived=False, user_id=self.user_id)
                     
                     # Create scroll area for column
                     scroll = QScrollArea()

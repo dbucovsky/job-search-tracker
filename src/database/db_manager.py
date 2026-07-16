@@ -53,19 +53,25 @@ class DatabaseManager:
         finally:
             session.close()
     
-    def get_all_applications(self):
+    def get_all_applications(self, user_id=None):
         """Get all job applications (including archived)."""
         session = self.get_session()
         try:
-            return session.query(JobApplication).all()
+            query = session.query(JobApplication)
+            if user_id is not None:
+                query = query.filter(JobApplication.user_id == user_id)
+            return query.all()
         finally:
             session.close()
     
-    def get_active_applications(self):
+    def get_active_applications(self, user_id=None):
         """Get only active (non-archived) job applications."""
         session = self.get_session()
         try:
-            return session.query(JobApplication).filter(JobApplication.is_archived == False).all()
+            query = session.query(JobApplication).filter(JobApplication.is_archived == False)
+            if user_id is not None:
+                query = query.filter(JobApplication.user_id == user_id)
+            return query.all()
         finally:
             session.close()
     
@@ -104,14 +110,17 @@ class DatabaseManager:
         finally:
             session.close()
     
-    def get_applications_by_status(self, status, archived=False):
+    def get_applications_by_status(self, status, archived=False, user_id=None):
         """Get applications filtered by status and archive status."""
         session = self.get_session()
         try:
-            return session.query(JobApplication).filter(
+            query = session.query(JobApplication).filter(
                 JobApplication.status == status,
                 JobApplication.is_archived == archived
-            ).all()
+            )
+            if user_id is not None:
+                query = query.filter(JobApplication.user_id == user_id)
+            return query.all()
         finally:
             session.close()
     

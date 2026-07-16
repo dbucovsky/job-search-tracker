@@ -38,9 +38,10 @@ class TableView(QWidget):
     application_updated = pyqtSignal()  # Signal when application data changes
     new_record_requested = pyqtSignal()  # Signal to create new record
     
-    def __init__(self, db_manager):
+    def __init__(self, db_manager, user_id=None):
         super().__init__()
         self.db_manager = db_manager
+        self.user_id = user_id
         self.show_archived = False  # Default to hiding archived
         self.updating_item = False  # Flag to prevent recursive updates
         self.init_ui()
@@ -104,9 +105,9 @@ class TableView(QWidget):
         """Refresh table with current applications."""
         # Get applications based on archive filter
         if self.show_archived:
-            applications = self.db_manager.get_all_applications()
+            applications = self.db_manager.get_all_applications(user_id=self.user_id)
         else:
-            applications = self.db_manager.get_active_applications()
+            applications = self.db_manager.get_active_applications(user_id=self.user_id)
         
         self.table.setRowCount(len(applications))
         

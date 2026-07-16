@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         tab_widget = QTabWidget()
         
         # Table View
-        self.table_view = TableView(self.db_manager)
+        self.table_view = TableView(self.db_manager, self.user_id)
         self.table_view.application_selected.connect(self.on_application_selected)
         self.table_view.deselect_requested.connect(self.on_deselect_requested)
         self.table_view.application_updated.connect(self.refresh_all_views)
@@ -56,14 +56,14 @@ class MainWindow(QMainWindow):
         tab_widget.addTab(self.table_view, "Table View")
         
         # Calendar View
-        self.calendar_view = CalendarView(self.db_manager)
+        self.calendar_view = CalendarView(self.db_manager, self.user_id)
         self.calendar_view.application_selected.connect(self.on_application_selected)
         self.calendar_view.deselect_requested.connect(self.on_deselect_requested)
         self.calendar_view.new_record_requested.connect(self.on_new_record_requested)
         tab_widget.addTab(self.calendar_view, "Calendar View")
         
         # Kanban View
-        self.kanban_view = KanbanView(self.db_manager)
+        self.kanban_view = KanbanView(self.db_manager, self.user_id)
         self.kanban_view.application_selected.connect(self.on_application_selected)
         self.kanban_view.application_updated.connect(self.refresh_all_views)
         self.kanban_view.new_record_requested.connect(self.on_new_record_requested)
