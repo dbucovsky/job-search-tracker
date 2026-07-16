@@ -125,7 +125,11 @@ class DatabaseManager:
             )
             session.add(user)
             session.commit()
-            return user
+            # Access attributes before closing session
+            user_id = user.id
+            user_username = user.username
+            session.expunge(user)
+            return {'id': user_id, 'username': user_username}
         finally:
             session.close()
     
@@ -133,7 +137,13 @@ class DatabaseManager:
         """Get user by username."""
         session = self.get_session()
         try:
-            return session.query(User).filter(User.username == username).first()
+            user = session.query(User).filter(User.username == username).first()
+            if user:
+                # Access attributes before closing session
+                user_id = user.id
+                user_username = user.username
+                return {'id': user_id, 'username': user_username}
+            return None
         finally:
             session.close()
     
@@ -141,6 +151,12 @@ class DatabaseManager:
         """Get user by ID."""
         session = self.get_session()
         try:
-            return session.query(User).filter(User.id == user_id).first()
+            user = session.query(User).filter(User.id == user_id).first()
+            if user:
+                # Access attributes before closing session
+                uid = user.id
+                uname = user.username
+                return {'id': uid, 'username': uname}
+            return None
         finally:
             session.close()
