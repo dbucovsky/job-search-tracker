@@ -1,5 +1,26 @@
 # Job Search Tracker - Version History
 
+## [0.6.0] - 2026-07-16 16:10
+
+### Features Added
+- N/A (Bug fixes and architecture improvements)
+
+### Bug Fixes
+- **CRITICAL**: Fixed Kanban drag-and-drop permanently opening detail popup
+- Replaced all previous timing/cooldown approaches with state machine architecture
+- Card now tracks STATE_IDLE → STATE_PRESSED → STATE_DRAGGING transitions
+- Clicks only emitted from PRESSED→IDLE, never from DRAGGING→IDLE
+- Completely eliminates synthetic event interference
+
+### Notes
+- Used proper state machine pattern instead of flags/timers
+- Simplest, most reliable solution: track what actually happened
+- If we enter DRAGGING state, reset to IDLE without emitting click
+- No race conditions, no timing issues, no cooldowns needed
+- This should be the final fix for the persistent drag issue
+
+---
+
 ## [0.5.9] - 2026-07-16 16:05
 
 ### Features Added
@@ -268,7 +289,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.5.9
+- **Latest Version**: 0.6.0
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 

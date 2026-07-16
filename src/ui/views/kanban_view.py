@@ -2,7 +2,7 @@
 Kanban board view for job applications organized by status.
 """
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollArea, QFrame, QPushButton
-from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QMimeData
 from PyQt5.QtGui import QDrag, QCursor
 from src.models.job_application import ApplicationStatus
 
@@ -12,17 +12,19 @@ class KanbanCard(QFrame):
     
     clicked = pyqtSignal(int)  # Signal when card is clicked
     
+    # Card state machine
+    STATE_IDLE = 0
+    STATE_PRESSED = 1  
+    STATE_DRAGGING = 2
+    
     def __init__(self, app_id, company_name, job_title, location=None):
         super().__init__()
         self.app_id = app_id
         self.company_name = company_name
         self.job_title = job_title
         self.location = location
-        self.press_pos = None  # Position where mouse was pressed
-        self.in_drag_cooldown = False  # Flag to prevent clicks right after drag
-        self.drag_cooldown_timer = QTimer()  # Timer for post-drag protection
-        self.drag_cooldown_timer.setSingleShot(True)
-        self.drag_cooldown_timer.timeout.connect(self.on_drag_cooldown_timeout)
+        self.state = self.STATE_IDLE
+        self.press_pos = None
         self.setStyleSheet("border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px; background-color: #f9f9f9;")
         self.setCursor(Qt.OpenHandCursor)
         self.init_ui()
@@ -49,14 +51,19 @@ class KanbanCard(QFrame):
         self.setLayout(layout)
     
     def mousePressEvent(self, event):
-        """Handle mouse press - record position for later comparison."""
-        if event.button() == Qt.LeftButton:
+        """Handle mouse press - transition from IDLE to PRESSED."""
+        if event.button() == Qt.LeftButton and self.state == self.STATE_IDLE:
+            self.state = self.STATE_PRESSED
             self.press_pos = event.pos()
             event.accept()
     
     def mouseMoveEvent(self, event):
-        """Handle mouse move for dragging."""
-        if not (event.buttons() & Qt.LeftButton) or self.press_pos is None:
+        """Handle mouse move - transition from PRESSED to DRAGGING."""
+        if not (event.buttons() & Qt.LeftButton):
+            return
+        
+        # Only handle if we're in PRESSED state (haven't started drag yet)
+        if self.state != self.STATE_PRESSED or self.press_pos is None:
             return
         
         # Check if movement is large enough to be a drag
@@ -64,7 +71,10 @@ class KanbanCard(QFrame):
         if movement < 5:
             return
         
-        # Large movement detected - perform drag operation
+        # Transition to DRAGGING state
+        self.state = self.STATE_DRAGGING
+        
+        # Perform drag operation
         drag = QDrag(self)
         mime_data = QMimeData()
         mime_data.setText(str(self.app_id))
@@ -72,24 +82,22 @@ class KanbanCard(QFrame):
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
         
-        # After drag completes, set cooldown to prevent synthetic click events
-        self.in_drag_cooldown = True
-        self.drag_cooldown_timer.start(150)  # 150ms cooldown after drag
+        # After drag completes, reset to IDLE
+        self.state = self.STATE_IDLE
         self.press_pos = None
     
-    def on_drag_cooldown_timeout(self):
-        """Called when drag cooldown expires."""
-        self.in_drag_cooldown = False
-    
     def mouseReleaseEvent(self, event):
-        """Handle mouse release - emit signal only if not in drag cooldown."""
+        """Handle mouse release - only emit click if we're still in PRESSED state."""
         if event.button() == Qt.LeftButton:
-            # Don't emit click if we're in post-drag cooldown period
-            if not self.in_drag_cooldown and self.press_pos is not None:
-                # Check if release happened at approximately same position as press
+            # Only emit click if we never transitioned to DRAGGING
+            if self.state == self.STATE_PRESSED and self.press_pos is not None:
+                # Verify position hasn't moved far
                 movement = (event.pos() - self.press_pos).manhattanLength()
                 if movement < 10:
                     self.clicked.emit(self.app_id)
+            
+            # Always reset to IDLE
+            self.state = self.STATE_IDLE
             self.press_pos = None
         event.accept()
     
