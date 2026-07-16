@@ -36,6 +36,7 @@ class TableView(QWidget):
     application_selected = pyqtSignal(int)  # Signal when an application is selected
     deselect_requested = pyqtSignal()  # Signal to deselect current application
     application_updated = pyqtSignal()  # Signal when application data changes
+    new_record_requested = pyqtSignal()  # Signal to create new record
     
     def __init__(self, db_manager):
         super().__init__()
@@ -53,6 +54,10 @@ class TableView(QWidget):
         self.show_archived_checkbox = QCheckBox("Show Archived")
         self.show_archived_checkbox.stateChanged.connect(self.on_show_archived_toggled)
         filter_layout.addWidget(self.show_archived_checkbox)
+        
+        new_btn = QPushButton("New Application")
+        new_btn.clicked.connect(self.new_record_requested.emit)
+        filter_layout.addWidget(new_btn)
         
         deselect_btn = QPushButton("Deselect Job")
         deselect_btn.clicked.connect(self.deselect_requested.emit)

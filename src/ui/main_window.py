@@ -35,18 +35,21 @@ class MainWindow(QMainWindow):
         self.table_view.application_selected.connect(self.on_application_selected)
         self.table_view.deselect_requested.connect(self.on_deselect_requested)
         self.table_view.application_updated.connect(self.refresh_all_views)
+        self.table_view.new_record_requested.connect(self.on_new_record_requested)
         tab_widget.addTab(self.table_view, "Table View")
         
         # Calendar View
         self.calendar_view = CalendarView(self.db_manager)
         self.calendar_view.application_selected.connect(self.on_application_selected)
         self.calendar_view.deselect_requested.connect(self.on_deselect_requested)
+        self.calendar_view.new_record_requested.connect(self.on_new_record_requested)
         tab_widget.addTab(self.calendar_view, "Calendar View")
         
         # Kanban View
         self.kanban_view = KanbanView(self.db_manager)
         self.kanban_view.application_selected.connect(self.on_application_selected)
         self.kanban_view.application_updated.connect(self.refresh_all_views)
+        self.kanban_view.new_record_requested.connect(self.on_new_record_requested)
         tab_widget.addTab(self.kanban_view, "Kanban Board")
         
         main_layout.addWidget(tab_widget)
@@ -67,6 +70,12 @@ class MainWindow(QMainWindow):
     def on_deselect_requested(self):
         """Handle deselect request."""
         self.current_app_id = None  # Clear current selection
+    
+    def on_new_record_requested(self):
+        """Handle new record request from any view."""
+        self.current_app_id = None  # Clear current selection to create new record
+        self.job_detail_view.clear_form()  # Clear form for new entry
+        self.job_detail_view.exec_()  # Show as modal dialog
     
     def on_detail_updated(self):
         """Handle updates from detail dialog."""

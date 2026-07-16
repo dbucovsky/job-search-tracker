@@ -13,6 +13,7 @@ class CalendarView(QWidget):
     date_selected = pyqtSignal(QDate)
     application_selected = pyqtSignal(int)  # Signal when an application is selected
     deselect_requested = pyqtSignal()  # Signal to deselect current application
+    new_record_requested = pyqtSignal()  # Signal to create new record
     
     def __init__(self, db_manager):
         super().__init__()
@@ -43,6 +44,9 @@ class CalendarView(QWidget):
         
         # Deselect button
         button_layout = QHBoxLayout()
+        new_btn = QPushButton("New Application")
+        new_btn.clicked.connect(self.new_record_requested.emit)
+        button_layout.addWidget(new_btn)
         self.deselect_btn = QPushButton("Deselect Job")
         self.deselect_btn.clicked.connect(self.deselect_requested.emit)
         button_layout.addStretch()

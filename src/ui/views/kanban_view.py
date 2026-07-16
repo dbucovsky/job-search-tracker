@@ -1,8 +1,8 @@
 """
 Kanban board view for job applications organized by status.
 """
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollArea, QFrame
-from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QTimer
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollArea, QFrame, QPushButton
+from PyQt5.QtCore import Qt, pyqtSignal, QMimeData
 from PyQt5.QtGui import QDrag, QCursor
 from src.models.job_application import ApplicationStatus
 
@@ -18,10 +18,7 @@ class KanbanCard(QFrame):
         self.company_name = company_name
         self.job_title = job_title
         self.location = location
-        self.is_dragging = False  # Track if dragging
-        self.pending_click_timer = QTimer()  # Timer for delayed single-click open
-        self.pending_click_timer.setSingleShot(True)
-        self.pending_click_timer.timeout.connect(self.on_pending_click_timeout)
+        self.press_pos = None  # Position where mouse was pressed
         self.setStyleSheet("border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px; background-color: #f9f9f9;")
         self.setCursor(Qt.OpenHandCursor)
         self.init_ui()
@@ -48,27 +45,22 @@ class KanbanCard(QFrame):
         self.setLayout(layout)
     
     def mousePressEvent(self, event):
-        """Handle mouse press for drag or click."""
+        """Handle mouse press - record position for later comparison."""
         if event.button() == Qt.LeftButton:
-            self.drag_start_pos = event.pos()
-            # Start timer for delayed single-click open (will cancel if drag happens)
-            if not self.pending_click_timer.isActive():
-                self.pending_click_timer.start(300)  # 300ms delay before opening
+            self.press_pos = event.pos()
             event.accept()
     
     def mouseMoveEvent(self, event):
         """Handle mouse move for dragging."""
-        if not (event.buttons() & Qt.LeftButton):
+        if not (event.buttons() & Qt.LeftButton) or self.press_pos is None:
             return
         
-        if (event.pos() - self.drag_start_pos).manhattanLength() < 5:
+        # Check if movement is large enough to be a drag
+        movement = (event.pos() - self.press_pos).manhattanLength()
+        if movement < 5:
             return
         
-        # Cancel pending click open when drag starts
-        self.pending_click_timer.stop()
-        self.is_dragging = True
-        
-        # Start drag
+        # Large movement detected - perform drag operation
         drag = QDrag(self)
         mime_data = QMimeData()
         mime_data.setText(str(self.app_id))
@@ -76,13 +68,19 @@ class KanbanCard(QFrame):
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
         
-        # Reset dragging flag after drag completes
-        self.is_dragging = False
+        # Clear press position to prevent click from firing after drag
+        self.press_pos = None
     
-    def on_pending_click_timeout(self):
-        """Called when pending click timer expires - open detail if not dragging."""
-        if not self.is_dragging:
-            self.clicked.emit(self.app_id)
+    def mouseReleaseEvent(self, event):
+        """Handle mouse release - emit signal only if release is at press position."""
+        if event.button() == Qt.LeftButton and self.press_pos is not None:
+            # Check if release happened at approximately same position as press
+            # If movement was < 10 pixels, it's a click not a drag
+            movement = (event.pos() - self.press_pos).manhattanLength()
+            if movement < 10:
+                self.clicked.emit(self.app_id)
+            self.press_pos = None
+        event.accept()
     
     def mouseDoubleClickEvent(self, event):
         """Handle double click - do nothing (use single-click instead)."""
@@ -158,6 +156,7 @@ class KanbanView(QWidget):
     
     application_selected = pyqtSignal(int)  # Signal when an application is selected
     application_updated = pyqtSignal()  # Signal when application status changes
+    new_record_requested = pyqtSignal()  # Signal to create new record
     
     def __init__(self, db_manager):
         super().__init__()
@@ -179,6 +178,25 @@ class KanbanView(QWidget):
                             item.widget().deleteLater()
             
             self.columns = []  # Reset columns list
+            
+            # Create main vertical layout
+            main_layout = self.layout()
+            if main_layout is None:
+                main_layout = QVBoxLayout()
+                self.setLayout(main_layout)
+            else:
+                while main_layout.count():
+                    main_layout.takeAt(0)
+            
+            # Add button bar
+            button_layout = QHBoxLayout()
+            new_btn = QPushButton("New Application")
+            new_btn.clicked.connect(self.new_record_requested.emit)
+            button_layout.addWidget(new_btn)
+            button_layout.addStretch()
+            main_layout.addLayout(button_layout)
+            
+            # Create scroll area for columns
             self.layout_widget = QWidget()
             layout = QHBoxLayout()
             layout.setContentsMargins(5, 5, 5, 5)

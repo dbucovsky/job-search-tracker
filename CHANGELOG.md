@@ -1,5 +1,25 @@
 # Job Search Tracker - Version History
 
+## [0.5.8] - 2026-07-16 16:00
+
+### Features Added
+- Added "New Application" button to all tabs (Table, Calendar, Kanban)
+- Create new job records from any view without needing to open the detail form first
+- New records are created via modal dialog popup
+
+### Bug Fixes
+- Fixed Kanban drag-and-drop triggering detail popup with position-based click detection
+- Replaced timer-based approach with mouse position tracking (press vs release)
+- Only emits click signal if mouse press and release occur within 10 pixels
+
+### Notes
+- Renamed "Clear" button to "New" in detail form for clarity
+- All three views now have consistent "New Application" button
+- Kanban now uses pure position tracking: no timers, no flags, no race conditions
+- Much more reliable and natural interaction pattern
+
+---
+
 ## [0.5.7] - 2026-07-16 15:50
 
 ### Features Added
@@ -230,7 +250,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.5.7
+- **Latest Version**: 0.5.8
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 

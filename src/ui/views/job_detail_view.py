@@ -99,9 +99,9 @@ class JobDetailView(QDialog):
         self.delete_btn.clicked.connect(self.delete_application)
         button_layout.addWidget(self.delete_btn)
         
-        self.clear_btn = QPushButton("Clear")
-        self.clear_btn.clicked.connect(self.clear_form)
-        button_layout.addWidget(self.clear_btn)
+        self.new_btn = QPushButton("New")
+        self.new_btn.clicked.connect(self.clear_form)
+        button_layout.addWidget(self.new_btn)
         
         self.close_btn = QPushButton("Close")
         self.close_btn.clicked.connect(self.close_dialog)
