@@ -1,5 +1,38 @@
 # Job Search Tracker - Version History
 
+## [0.6.2] - 2026-07-16 16:20
+
+### Features Added
+- N/A (Bug fix only)
+
+### Bug Fixes
+- Fixed missing QTimer import that was causing "name 'QTimer' is not defined" errors
+- Restored QTimer to kanban_view.py imports for post-drag cooldown functionality
+
+### Notes
+- Critical fix for Kanban initialization errors
+- All columns now initialize without import errors
+
+---
+
+## [0.6.1] - 2026-07-16 16:18
+
+### Features Added
+- N/A (Bug fixes only)
+
+### Bug Fixes
+- Fixed Kanban UI display issue where columns and cards were not showing
+- Removed duplicate main_layout creation that was clearing all widgets
+- Fixed layout initialization logic to prevent widget destruction
+- Cleaned up CHANGELOG: removed duplicate version entries
+- Version history now flows logically without duplicate 0.5.10 entries
+
+### Notes
+- Kanban columns and application cards now display correctly
+- UI layout properly initialized on refresh
+
+---
+
 ## [0.6.0] - 2026-07-16 16:15
 
 ### Features Added
@@ -290,7 +323,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.6.0
+- **Latest Version**: 0.6.2
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 
