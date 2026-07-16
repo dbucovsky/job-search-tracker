@@ -1,5 +1,26 @@
 # Job Search Tracker - Version History
 
+## [0.7.2] - 2026-07-16 16:40
+
+### Features Added
+- N/A
+
+### Bug Fixes
+- Fixed DetachedInstanceError when registering new user
+- User methods now return dictionaries instead of detached SQLAlchemy objects
+- Password verification now uses active session to prevent detached object errors
+
+### Known Issues
+- **Kanban drag-and-drop**: Dragging cards still opens detail popup in some cases
+  - Workaround: Use Table or Calendar view to edit applications
+  - Will be fixed in a future version with alternative UI approach
+
+### Notes
+- User registration fully functional and crash-free
+- All user database operations properly handle session lifecycle
+
+---
+
 ## [0.7.1] - 2026-07-16 16:35
 
 ### Features Added
@@ -391,7 +412,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.7.1
+- **Latest Version**: 0.7.2
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 
