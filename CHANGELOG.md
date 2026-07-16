@@ -1,5 +1,25 @@
 # Job Search Tracker - Version History
 
+## [0.7.1] - 2026-07-16 16:35
+
+### Features Added
+- N/A
+
+### Bug Fixes
+- Fixed sqlite3.OperationalError when registering new user
+- User model now shares Base with JobApplication to ensure users table is created
+
+### Known Issues
+- **Kanban drag-and-drop**: Dragging cards still opens detail popup in some cases
+  - Workaround: Use Table or Calendar view to edit applications
+  - Will be fixed in a future version with alternative UI approach
+
+### Notes
+- Users table now properly created on first run
+- User registration flow fully functional
+
+---
+
 ## [0.7.0] - 2026-07-16 16:30
 
 ### Features Added
@@ -371,7 +391,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.7.0
+- **Latest Version**: 0.7.1
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 
