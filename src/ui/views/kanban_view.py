@@ -51,7 +51,10 @@ class KanbanCard(QFrame):
     def mousePressEvent(self, event):
         """Handle mouse press for drag or click."""
         if event.button() == Qt.LeftButton:
-            self.drag_start_pos = event.pos()
+            # Only set drag start if not in cooldown from previous drag
+            if not self.is_dragging:
+                self.drag_start_pos = event.pos()
+            event.accept()
     
     def mouseMoveEvent(self, event):
         """Handle mouse move for dragging."""
@@ -73,8 +76,16 @@ class KanbanCard(QFrame):
         drag.exec_(Qt.MoveAction)
         
         # Start cooldown timer to prevent double-click after drag
-        # Wait 200ms to allow all drag-related events to be processed
-        self.drag_cooldown_timer.start(200)
+        # Wait 500ms to allow all drag-related events to be processed
+        self.drag_cooldown_timer.start(500)
+    
+    def mouseReleaseEvent(self, event):
+        """Handle mouse release - ignore if we were dragging."""
+        if self.is_dragging:
+            # Eat the event to prevent accidental double-clicks
+            event.accept()
+        else:
+            super().mouseReleaseEvent(event)
     
     def on_drag_cooldown_end(self):
         """Called when drag cooldown ends - safe to allow double-click again."""
@@ -85,6 +96,10 @@ class KanbanCard(QFrame):
         # Only emit if we're not dragging and cooldown is complete
         if not self.is_dragging:
             self.clicked.emit(self.app_id)
+            event.accept()
+        else:
+            # Eat the event if still in cooldown
+            event.accept()
 
 
 class KanbanColumn(QFrame):
