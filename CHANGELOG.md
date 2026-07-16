@@ -1,5 +1,24 @@
 # Job Search Tracker - Version History
 
+## [0.5.7] - 2026-07-16 15:50
+
+### Features Added
+- N/A (Bug fixes and UX improvements)
+
+### Bug Fixes
+- Fixed persistent Kanban drag-and-drop opening detail popup
+- Fixed detail popup clearing form after save instead of staying on edited entry
+- Changed Kanban interaction model from double-click to delayed single-click
+
+### Notes
+- Kanban cards now use 300ms delayed single-click (cancel on drag start)
+- More natural UX: click to open details, drag to change status
+- Detail popup reloads saved application after save (keeps it open)
+- Eliminates all race conditions in Kanban drag detection
+- User can now save edits without losing context
+
+---
+
 ## [0.5.6] - 2026-07-16 15:45
 
 ### Features Added
@@ -211,7 +230,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.5.6
+- **Latest Version**: 0.5.7
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 

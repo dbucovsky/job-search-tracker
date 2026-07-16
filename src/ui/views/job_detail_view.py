@@ -178,15 +178,18 @@ class JobDetailView(QDialog):
             )
         
         self.application_updated.emit()
-        self.clear_form()
+        # Reload the application to keep dialog open with saved data
+        if self.current_app_id:
+            self.load_application(self.current_app_id)
     
     def delete_application(self):
         """Delete the current application."""
         if self.current_app_id:
             self.db_manager.delete_application(self.current_app_id)
             self.application_updated.emit()
-            self.clear_form()
-    
+        # Reload the application to keep dialog open with saved data
+        if self.current_app_id:
+            self.load_application(self.current_app_id)
     def clear_form(self):
         """Clear the form."""
         self.current_app_id = None

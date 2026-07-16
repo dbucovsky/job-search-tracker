@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollAr
 from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QTimer
 from PyQt5.QtGui import QDrag, QCursor
 from src.models.job_application import ApplicationStatus
-import time
 
 
 class KanbanCard(QFrame):
@@ -19,8 +18,10 @@ class KanbanCard(QFrame):
         self.company_name = company_name
         self.job_title = job_title
         self.location = location
-        self.last_drag_end_time = 0  # Track when drag ended (using timestamp)
-        self.drag_cooldown_ms = 500  # Milliseconds to ignore double-clicks after drag
+        self.is_dragging = False  # Track if dragging
+        self.pending_click_timer = QTimer()  # Timer for delayed single-click open
+        self.pending_click_timer.setSingleShot(True)
+        self.pending_click_timer.timeout.connect(self.on_pending_click_timeout)
         self.setStyleSheet("border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px; background-color: #f9f9f9;")
         self.setCursor(Qt.OpenHandCursor)
         self.init_ui()
@@ -50,6 +51,9 @@ class KanbanCard(QFrame):
         """Handle mouse press for drag or click."""
         if event.button() == Qt.LeftButton:
             self.drag_start_pos = event.pos()
+            # Start timer for delayed single-click open (will cancel if drag happens)
+            if not self.pending_click_timer.isActive():
+                self.pending_click_timer.start(300)  # 300ms delay before opening
             event.accept()
     
     def mouseMoveEvent(self, event):
@@ -60,6 +64,10 @@ class KanbanCard(QFrame):
         if (event.pos() - self.drag_start_pos).manhattanLength() < 5:
             return
         
+        # Cancel pending click open when drag starts
+        self.pending_click_timer.stop()
+        self.is_dragging = True
+        
         # Start drag
         drag = QDrag(self)
         mime_data = QMimeData()
@@ -68,21 +76,17 @@ class KanbanCard(QFrame):
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
         
-        # Record when drag ended (timestamp-based, not timer-based)
-        self.last_drag_end_time = time.time() * 1000  # Convert to milliseconds
+        # Reset dragging flag after drag completes
+        self.is_dragging = False
+    
+    def on_pending_click_timeout(self):
+        """Called when pending click timer expires - open detail if not dragging."""
+        if not self.is_dragging:
+            self.clicked.emit(self.app_id)
     
     def mouseDoubleClickEvent(self, event):
-        """Handle double click to open."""
-        current_time = time.time() * 1000  # Current time in milliseconds
-        time_since_drag = current_time - self.last_drag_end_time
-        
-        # Only open popup if enough time has passed since last drag ended
-        if time_since_drag > self.drag_cooldown_ms:
-            self.clicked.emit(self.app_id)
-            event.accept()
-        else:
-            # Ignore double-click that happens too soon after drag
-            event.accept()
+        """Handle double click - do nothing (use single-click instead)."""
+        event.accept()
 
 
 class KanbanColumn(QFrame):
