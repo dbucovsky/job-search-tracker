@@ -2,7 +2,7 @@
 Kanban board view for job applications organized by status.
 """
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollArea, QFrame, QPushButton
-from PyQt5.QtCore import Qt, pyqtSignal, QMimeData
+from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QTimer
 from PyQt5.QtGui import QDrag, QCursor
 from src.models.job_application import ApplicationStatus
 
