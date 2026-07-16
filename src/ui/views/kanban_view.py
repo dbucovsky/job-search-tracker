@@ -215,7 +215,9 @@ class KanbanView(QWidget):
                 self.setLayout(main_layout)
             else:
                 while main_layout.count():
-                    main_layout.takeAt(0)
+                    item = main_layout.takeAt(0)
+                    if item.widget():
+                        item.widget().deleteLater()
             
             # Add button bar
             button_layout = QHBoxLayout()
@@ -256,15 +258,7 @@ class KanbanView(QWidget):
             
             self.layout_widget.setLayout(layout)
             
-            # Set main layout
-            main_layout = self.layout()
-            if main_layout is None:
-                main_layout = QVBoxLayout()
-                self.setLayout(main_layout)
-            else:
-                while main_layout.count():
-                    main_layout.takeAt(0)
-            
+            # Add layout_widget to main layout
             main_layout.addWidget(self.layout_widget)
         except Exception as e:
             print(f"Error in Kanban init_ui: {e}")

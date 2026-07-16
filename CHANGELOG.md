@@ -1,57 +1,24 @@
 # Job Search Tracker - Version History
-## [0.5.10] - 2026-07-16 16:15
+
+## [0.6.0] - 2026-07-16 16:15
 
 ### Features Added
-- Added About menu with app information
-- About dialog shows app name, version, last update date/time, and features list
+- Added About menu with app information (Help → About)
+- About dialog shows app name, version, last update date/time, and comprehensive features list
 
 ### Bug Fixes
-- Fixed Kanban drag-and-drop opening detail popup with hybrid state machine + cooldown
-- Added post-drag 200ms cooldown to block synthetic click events
-- State machine ensures clicks only from true PRESSED→IDLE transitions
+- Fixed Kanban drag-and-drop opening detail popup
+- Implemented state machine architecture (STATE_IDLE → STATE_PRESSED → STATE_DRAGGING)
+- Added post-drag 200ms cooldown to block synthetic click events after drag.exec_()
+- Hybrid approach combines state machine + cooldown for maximum robustness
+- Card only emits click signals from PRESSED→IDLE transitions
+- Completely eliminates synthetic event interference from drag operations
 
 ### Notes
-- Version numbering corrected: bug fixes increment Z (0.5.10 not 0.6.0)
-- Hybrid approach: state machine + post-drag cooldown = maximum robustness
-- About menu accessible from Help menu in main window
-
----
-## [0.5.10] - 2026-07-16 16:15
-
-### Features Added
-- Added About menu with app information
-- About dialog shows app name, version, last update date/time, and features list
-
-### Bug Fixes
-- Fixed Kanban drag-and-drop opening detail popup with hybrid state machine + cooldown
-- Added post-drag 200ms cooldown to block synthetic click events
-- State machine ensures clicks only from true PRESSED→IDLE transitions
-
-### Notes
-- Version numbering corrected: bug fixes increment Z (0.5.10 not 0.6.0)
-- Hybrid approach: state machine + post-drag cooldown = maximum robustness
-- About menu accessible from Help menu in main window
-
----
-
-## [0.6.0] - 2026-07-16 16:10
-
-### Features Added
-- N/A (Bug fixes and architecture improvements)
-
-### Bug Fixes
-- **CRITICAL**: Fixed Kanban drag-and-drop permanently opening detail popup
-- Replaced all previous timing/cooldown approaches with state machine architecture
-- Card now tracks STATE_IDLE → STATE_PRESSED → STATE_DRAGGING transitions
-- Clicks only emitted from PRESSED→IDLE, never from DRAGGING→IDLE
-- Completely eliminates synthetic event interference
-
-### Notes
-- Used proper state machine pattern instead of flags/timers
-- Simplest, most reliable solution: track what actually happened
-- If we enter DRAGGING state, reset to IDLE without emitting click
-- No race conditions, no timing issues, no cooldowns needed
-- This should be the final fix for the persistent drag issue
+- State machine replaces all previous timing-based approaches
+- Cleaner, more deterministic logic for click vs drag detection
+- If state reaches DRAGGING, reset to IDLE without emitting click
+- No race conditions or timing issues with hybrid approach
 
 ---
 
@@ -323,7 +290,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.5.10
+- **Latest Version**: 0.6.0
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 
