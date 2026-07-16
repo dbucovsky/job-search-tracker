@@ -13,22 +13,32 @@ from src.ui.about_dialog import AboutDialog
 class MainWindow(QMainWindow):
     """Main application window."""
     
-    def __init__(self, db_manager):
+    def __init__(self, db_manager, user_id=None, username=None):
         super().__init__()
         self.db_manager = db_manager
         self.current_app_id = None  # Track currently selected application
+        self.user_id = user_id
+        self.username = username
         self.init_ui()
     
     def init_ui(self):
         """Initialize main window UI."""
-        self.setWindowTitle("Job Search Tracker")
+        title = f"Job Search Tracker - {self.username}" if self.username else "Job Search Tracker"
+        self.setWindowTitle(title)
         self.setGeometry(100, 100, 1000, 800)
         
         # Create menu bar
         menubar = self.menuBar()
+        
+        # Help menu
         help_menu = menubar.addMenu("Help")
         about_action = help_menu.addAction("About")
         about_action.triggered.connect(self.on_about)
+        
+        # User menu
+        user_menu = menubar.addMenu(f"User: {self.username}")
+        logout_action = user_menu.addAction("Logout")
+        logout_action.triggered.connect(self.on_logout)
         
         # Central widget
         central_widget = QWidget()
@@ -109,3 +119,8 @@ class MainWindow(QMainWindow):
         """Handle About menu action."""
         about_dialog = AboutDialog(self)
         about_dialog.exec_()
+    
+    def on_logout(self):
+        """Handle logout - close application."""
+        import sys
+        sys.exit(0)

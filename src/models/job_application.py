@@ -23,6 +23,7 @@ class JobApplication(Base):
     __tablename__ = "job_applications"
 
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, nullable=False)  # Associate application with user
     company_name = Column(String(255), nullable=False)
     job_title = Column(String(255), nullable=False)
     job_url = Column(String(500), nullable=True)

@@ -5,6 +5,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.models.job_application import Base, JobApplication
+from src.models.user import User
 
 
 class DatabaseManager:
@@ -110,5 +111,36 @@ class DatabaseManager:
                 JobApplication.status == status,
                 JobApplication.is_archived == archived
             ).all()
+        finally:
+            session.close()
+    
+    # User authentication methods
+    def create_user(self, username, password):
+        """Create a new user account."""
+        session = self.get_session()
+        try:
+            user = User(
+                username=username,
+                password_hash=User.hash_password(password)
+            )
+            session.add(user)
+            session.commit()
+            return user
+        finally:
+            session.close()
+    
+    def get_user_by_username(self, username):
+        """Get user by username."""
+        session = self.get_session()
+        try:
+            return session.query(User).filter(User.username == username).first()
+        finally:
+            session.close()
+    
+    def get_user_by_id(self, user_id):
+        """Get user by ID."""
+        session = self.get_session()
+        try:
+            return session.query(User).filter(User.id == user_id).first()
         finally:
             session.close()

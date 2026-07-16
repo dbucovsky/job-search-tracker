@@ -1,5 +1,33 @@
 # Job Search Tracker - Version History
 
+## [0.7.0] - 2026-07-16 16:30
+
+### Features Added
+- **User Authentication**: Full login and registration system
+- Multi-user support with separate job records per user
+- User menu showing current logged-in user
+- Logout functionality (returns to login screen)
+- Database schema updated to associate applications with users
+- Title bar shows current username
+
+### Bug Fixes
+- N/A
+
+### Known Issues
+- **Kanban drag-and-drop**: Dragging cards still opens detail popup in some cases
+  - Workaround: Use Table or Calendar view to edit applications
+  - Will be fixed in a future version with alternative UI approach
+  - State machine + aggressive click blocking partially mitigates issue but not 100% reliable
+
+### Notes
+- Each user has completely separate job application database
+- Passwords stored as SHA-256 hashes
+- First-time users see registration tab
+- Returning users use login tab
+- User context maintained throughout session
+
+---
+
 ## [0.6.3] - 2026-07-16 16:25
 
 ### Features Added
@@ -343,7 +371,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.6.3
+- **Latest Version**: 0.7.0
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 

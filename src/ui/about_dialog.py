@@ -26,10 +26,10 @@ class AboutDialog(QDialog):
         layout.addWidget(title)
         
         # Version and date info
-        version_info = QLabel("Version: 0.6.3")
+        version_info = QLabel("Version: 0.7.0")
         layout.addWidget(version_info)
         
-        last_updated = QLabel("Last Updated: 2026-07-16 16:25")
+        last_updated = QLabel("Last Updated: 2026-07-16 16:30")
         layout.addWidget(last_updated)
         
         # Description
