@@ -1,5 +1,25 @@
 # Job Search Tracker - Version History
 
+## [0.6.3] - 2026-07-16 16:25
+
+### Features Added
+- N/A (Bug fix only)
+
+### Bug Fixes
+- **CRITICAL**: Fixed persistent Kanban drag-and-drop opening detail popup
+- Replaced state machine + cooldown with aggressive click blocking
+- Set `block_clicks = True` as soon as drag movement detected
+- Block persists for 500ms AFTER drag completes
+- Complete protection: clicks are never emitted during or after drag operations
+
+### Notes
+- Renamed flag from `just_dragged` to `block_clicks` for clarity
+- Aggressive 500ms block ensures all synthetic events are caught
+- Works by preventing click signal emission entirely, not by timing tricks
+- Most direct solution to drag-opening-popup problem
+
+---
+
 ## [0.6.2] - 2026-07-16 16:20
 
 ### Features Added
@@ -323,7 +343,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.6.2
+- **Latest Version**: 0.6.3
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 

@@ -25,13 +25,13 @@ class KanbanCard(QFrame):
         self.location = location
         self.state = self.STATE_IDLE
         self.press_pos = None
-        self.just_dragged = False  # Flag to block clicks right after drag
-        self.drag_cooldown = QTimer()
-        self.drag_cooldown.setSingleShot(True)
-        self.drag_cooldown.timeout.connect(lambda: setattr(self, 'just_dragged', False))
+        self.block_clicks = False  # Aggressive flag: block ALL clicks when True
+        self.click_blocker = QTimer()
+        self.click_blocker.setSingleShot(True)
+        self.click_blocker.timeout.connect(lambda: setattr(self, 'block_clicks', False))
         self.setStyleSheet("border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px; background-color: #f9f9f9;")
         self.setCursor(Qt.OpenHandCursor)
-        self.setAcceptDrops(False)  # Only drag, not drop
+        self.setAcceptDrops(False)
         self.init_ui()
     
     def init_ui(self):
@@ -78,6 +78,10 @@ class KanbanCard(QFrame):
             event.accept()
             return
         
+        # DRAG DETECTED: Immediately block all clicks for 500ms
+        self.block_clicks = True
+        self.click_blocker.start(500)  # Aggressive 500ms block
+        
         # Transition to DRAGGING state
         self.state = self.STATE_DRAGGING
         
@@ -89,18 +93,16 @@ class KanbanCard(QFrame):
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
         
-        # After drag completes, set just_dragged flag and reset state
-        self.just_dragged = True
-        self.drag_cooldown.start(200)  # 200ms cooldown
+        # After drag completes, reset state
         self.state = self.STATE_IDLE
         self.press_pos = None
         event.accept()
     
     def mouseReleaseEvent(self, event):
-        """Handle mouse release - only emit click if not dragging and not in cooldown."""
+        """Handle mouse release - only emit click if block_clicks is False."""
         if event.button() == Qt.LeftButton:
-            # Don't emit click if we just dragged or are in cooldown
-            if not self.just_dragged and self.state == self.STATE_PRESSED and self.press_pos is not None:
+            # NEVER emit click if block_clicks is set (during or after drag)
+            if not self.block_clicks and self.state == self.STATE_PRESSED and self.press_pos is not None:
                 # Verify position hasn't moved far
                 movement = (event.pos() - self.press_pos).manhattanLength()
                 if movement < 10:
