@@ -2,7 +2,7 @@
 Kanban board view for job applications organized by status.
 """
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollArea, QFrame, QPushButton
-from PyQt5.QtCore import Qt, pyqtSignal, QMimeData
+from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QTimer
 from PyQt5.QtGui import QDrag, QCursor
 from src.models.job_application import ApplicationStatus
 
@@ -19,6 +19,10 @@ class KanbanCard(QFrame):
         self.job_title = job_title
         self.location = location
         self.press_pos = None  # Position where mouse was pressed
+        self.in_drag_cooldown = False  # Flag to prevent clicks right after drag
+        self.drag_cooldown_timer = QTimer()  # Timer for post-drag protection
+        self.drag_cooldown_timer.setSingleShot(True)
+        self.drag_cooldown_timer.timeout.connect(self.on_drag_cooldown_timeout)
         self.setStyleSheet("border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px; background-color: #f9f9f9;")
         self.setCursor(Qt.OpenHandCursor)
         self.init_ui()
@@ -68,17 +72,24 @@ class KanbanCard(QFrame):
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
         
-        # Clear press position to prevent click from firing after drag
+        # After drag completes, set cooldown to prevent synthetic click events
+        self.in_drag_cooldown = True
+        self.drag_cooldown_timer.start(150)  # 150ms cooldown after drag
         self.press_pos = None
     
+    def on_drag_cooldown_timeout(self):
+        """Called when drag cooldown expires."""
+        self.in_drag_cooldown = False
+    
     def mouseReleaseEvent(self, event):
-        """Handle mouse release - emit signal only if release is at press position."""
-        if event.button() == Qt.LeftButton and self.press_pos is not None:
-            # Check if release happened at approximately same position as press
-            # If movement was < 10 pixels, it's a click not a drag
-            movement = (event.pos() - self.press_pos).manhattanLength()
-            if movement < 10:
-                self.clicked.emit(self.app_id)
+        """Handle mouse release - emit signal only if not in drag cooldown."""
+        if event.button() == Qt.LeftButton:
+            # Don't emit click if we're in post-drag cooldown period
+            if not self.in_drag_cooldown and self.press_pos is not None:
+                # Check if release happened at approximately same position as press
+                movement = (event.pos() - self.press_pos).manhattanLength()
+                if movement < 10:
+                    self.clicked.emit(self.app_id)
             self.press_pos = None
         event.accept()
     

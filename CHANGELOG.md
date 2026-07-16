@@ -1,5 +1,23 @@
 # Job Search Tracker - Version History
 
+## [0.5.9] - 2026-07-16 16:05
+
+### Features Added
+- N/A (Bug fixes only)
+
+### Bug Fixes
+- Fixed Kanban drag-and-drop opening detail popup with post-drag cooldown
+- Added 150ms cooldown after drag operation to prevent synthetic click events
+- Robust approach: ignores any clicks that fire during or immediately after drag
+
+### Notes
+- Post-drag cooldown blocks click signals for 150ms after drag completes
+- Prevents all synthetic or delayed click events from drag operation
+- Combined with position-based detection for maximum reliability
+- No more race conditions or timing issues
+
+---
+
 ## [0.5.8] - 2026-07-16 16:00
 
 ### Features Added
@@ -250,7 +268,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.5.8
+- **Latest Version**: 0.5.9
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 
