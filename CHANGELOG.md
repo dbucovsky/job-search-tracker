@@ -1,5 +1,23 @@
 # Job Search Tracker - Version History
 
+## [0.5.6] - 2026-07-16 15:45
+
+### Features Added
+- N/A (Bug fix only)
+
+### Bug Fixes
+- Completely fixed Kanban drag-and-drop opening detail popup
+- Replaced timer-based cooldown with timestamp-based approach
+- Eliminated race conditions in drag detection
+
+### Notes
+- Uses system time (millisecond precision) instead of relying on timers
+- More reliable: checks elapsed time since last drag ended
+- If less than 500ms has passed since drag, all double-clicks are ignored
+- No more timer state issues or event ordering problems
+
+---
+
 ## [0.5.5] - 2026-07-16 15:30
 
 ### Features Added
@@ -193,7 +211,7 @@
 - **Z (Patch)**: Incremented for bug fixes and corrections (no new features)
 
 ### Current Status
-- **Latest Version**: 0.5.5
+- **Latest Version**: 0.5.6
 - **Stability**: Stable - All core features working correctly
 - **Next Major Version Target**: 1.0.0 (when additional major features are planned)
 

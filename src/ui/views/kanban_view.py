@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollAr
 from PyQt5.QtCore import Qt, pyqtSignal, QMimeData, QTimer
 from PyQt5.QtGui import QDrag, QCursor
 from src.models.job_application import ApplicationStatus
+import time
 
 
 class KanbanCard(QFrame):
@@ -18,11 +19,8 @@ class KanbanCard(QFrame):
         self.company_name = company_name
         self.job_title = job_title
         self.location = location
-        self.is_dragging = False  # Track if we're currently dragging
-        # Timer to prevent double-click after drag completes
-        self.drag_cooldown_timer = QTimer()
-        self.drag_cooldown_timer.setSingleShot(True)
-        self.drag_cooldown_timer.timeout.connect(self.on_drag_cooldown_end)
+        self.last_drag_end_time = 0  # Track when drag ended (using timestamp)
+        self.drag_cooldown_ms = 500  # Milliseconds to ignore double-clicks after drag
         self.setStyleSheet("border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px; background-color: #f9f9f9;")
         self.setCursor(Qt.OpenHandCursor)
         self.init_ui()
@@ -51,9 +49,7 @@ class KanbanCard(QFrame):
     def mousePressEvent(self, event):
         """Handle mouse press for drag or click."""
         if event.button() == Qt.LeftButton:
-            # Only set drag start if not in cooldown from previous drag
-            if not self.is_dragging:
-                self.drag_start_pos = event.pos()
+            self.drag_start_pos = event.pos()
             event.accept()
     
     def mouseMoveEvent(self, event):
@@ -64,9 +60,6 @@ class KanbanCard(QFrame):
         if (event.pos() - self.drag_start_pos).manhattanLength() < 5:
             return
         
-        # Mark as dragging
-        self.is_dragging = True
-        
         # Start drag
         drag = QDrag(self)
         mime_data = QMimeData()
@@ -75,30 +68,20 @@ class KanbanCard(QFrame):
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
         
-        # Start cooldown timer to prevent double-click after drag
-        # Wait 500ms to allow all drag-related events to be processed
-        self.drag_cooldown_timer.start(500)
-    
-    def mouseReleaseEvent(self, event):
-        """Handle mouse release - ignore if we were dragging."""
-        if self.is_dragging:
-            # Eat the event to prevent accidental double-clicks
-            event.accept()
-        else:
-            super().mouseReleaseEvent(event)
-    
-    def on_drag_cooldown_end(self):
-        """Called when drag cooldown ends - safe to allow double-click again."""
-        self.is_dragging = False
+        # Record when drag ended (timestamp-based, not timer-based)
+        self.last_drag_end_time = time.time() * 1000  # Convert to milliseconds
     
     def mouseDoubleClickEvent(self, event):
         """Handle double click to open."""
-        # Only emit if we're not dragging and cooldown is complete
-        if not self.is_dragging:
+        current_time = time.time() * 1000  # Current time in milliseconds
+        time_since_drag = current_time - self.last_drag_end_time
+        
+        # Only open popup if enough time has passed since last drag ended
+        if time_since_drag > self.drag_cooldown_ms:
             self.clicked.emit(self.app_id)
             event.accept()
         else:
-            # Eat the event if still in cooldown
+            # Ignore double-click that happens too soon after drag
             event.accept()
 
 
