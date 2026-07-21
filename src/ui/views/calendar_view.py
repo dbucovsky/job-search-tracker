@@ -150,20 +150,22 @@ class CalendarView(QWidget):
     def refresh(self):
         """Refresh calendar with updated applications."""
         try:
-            # Simply clear all formatting and re-highlight
+            # Clear formatting only for dates we actually marked last time
+            # (previously this brute-forced every day of the current year,
+            # which missed highlights left over on dates in other years).
             clear_format = QTextCharFormat()
-            
-            # Clear all previously marked dates (including today)
-            # Clear a broader range to ensure all old formatting is removed
-            for month in range(1, 13):
-                for day in range(1, 32):
-                    try:
-                        qdate = QDate(QDate.currentDate().year(), month, day)
+            for date_key in self.marked_dates:
+                try:
+                    parts = date_key.split('-')
+                    if len(parts) == 3:
+                        qdate = QDate(int(parts[0]), int(parts[1]), int(parts[2]))
                         if qdate.isValid():
                             self.calendar.setDateTextFormat(qdate, clear_format)
-                    except:
-                        pass
-            
+                except Exception as e:
+                    print(f"Error clearing highlight: {e}")
+            # Also clear today's format in case it had no job application
+            self.calendar.setDateTextFormat(QDate.currentDate(), clear_format)
+
             # Refresh highlighting
             self.refresh_highlighting()
             

@@ -270,10 +270,10 @@ class KanbanView(QWidget):
         """Handle status change from drag and drop."""
         try:
             self.refresh()
-            # Emit both signals: refresh other views AND update detail view
+            # Refresh other views. Do NOT emit application_selected here -
+            # that signal opens the modal detail dialog in MainWindow, which
+            # was the cause of the popup appearing on every drag-and-drop.
             self.application_updated.emit()
-            # Also emit application_selected to update detail view with new data
-            self.application_selected.emit(app_id)
         except Exception as e:
             print(f"Error handling status change: {e}")
     

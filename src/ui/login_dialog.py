@@ -91,25 +91,13 @@ class LoginDialog(QDialog):
             return
         
         user = self.db_manager.get_user_by_username(username)
-        if user and self.verify_user_password(username, password):
+        if user and self.db_manager.verify_password(username, password):
             self.user_logged_in.emit(user['id'], user['username'])
             self.accept()
         else:
             self.show_error("Invalid username or password")
             self.login_password.clear()
-    
-    def verify_user_password(self, username, password):
-        """Verify user password."""
-        from src.models.user import User
-        session = self.db_manager.get_session()
-        try:
-            user = session.query(User).filter(User.username == username).first()
-            if user:
-                return user.verify_password(password)
-            return False
-        finally:
-            session.close()
-    
+
     def on_register(self):
         """Handle registration."""
         username = self.register_username.text().strip()

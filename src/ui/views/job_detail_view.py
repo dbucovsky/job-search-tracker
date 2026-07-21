@@ -170,6 +170,7 @@ class JobDetailView(QDialog):
                 job_title=self.title_input.text(),
                 job_url=self.url_input.text(),
                 status=status,
+                date_applied=self.date_input.date().toPyDate(),
                 salary_range=self.salary_input.text(),
                 location=self.location_input.text(),
                 contact_name=self.contact_name_input.text(),
@@ -187,11 +188,19 @@ class JobDetailView(QDialog):
     def delete_application(self):
         """Delete the current application."""
         if self.current_app_id:
+            from PyQt5.QtWidgets import QMessageBox
+            confirm = QMessageBox.question(
+                self, "Delete Application",
+                "Are you sure you want to delete this application? This cannot be undone.",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+            )
+            if confirm != QMessageBox.Yes:
+                return
+
             self.db_manager.delete_application(self.current_app_id)
             self.application_updated.emit()
-        # Reload the application to keep dialog open with saved data
-        if self.current_app_id:
-            self.load_application(self.current_app_id)
+            # The record is gone - clear the form instead of reloading it
+            self.clear_form()
     def clear_form(self):
         """Clear the form."""
         self.current_app_id = None

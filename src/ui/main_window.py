@@ -2,7 +2,7 @@
 Main window for the Job Search Tracker application.
 """
 from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTabWidget, QMenuBar, QMenu
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from src.ui.views.table_view import TableView
 from src.ui.views.calendar_view import CalendarView
 from src.ui.views.kanban_view import KanbanView
@@ -12,7 +12,9 @@ from src.ui.about_dialog import AboutDialog
 
 class MainWindow(QMainWindow):
     """Main application window."""
-    
+
+    logout_requested = pyqtSignal()  # Signal when the user logs out (return to login screen)
+
     def __init__(self, db_manager, user_id=None, username=None):
         super().__init__()
         self.db_manager = db_manager
@@ -121,6 +123,6 @@ class MainWindow(QMainWindow):
         about_dialog.exec_()
     
     def on_logout(self):
-        """Handle logout - close application."""
-        import sys
-        sys.exit(0)
+        """Handle logout - close this window and return to the login screen."""
+        self.logout_requested.emit()
+        self.close()

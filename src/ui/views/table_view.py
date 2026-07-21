@@ -108,40 +108,51 @@ class TableView(QWidget):
             applications = self.db_manager.get_all_applications(user_id=self.user_id)
         else:
             applications = self.db_manager.get_active_applications(user_id=self.user_id)
-        
-        self.table.setRowCount(len(applications))
-        
-        for row, app in enumerate(applications):
-            # Company
-            self.table.setItem(row, 0, QTableWidgetItem(app.company_name))
-            
-            # Job Title
-            self.table.setItem(row, 1, QTableWidgetItem(app.job_title))
-            
-            # Status with color
-            status_item = QTableWidgetItem(app.status.value)
-            status_color = app.get_status_color(app.status)
-            status_item.setBackground(QColor(status_color))
-            self.table.setItem(row, 2, status_item)
-            
-            # Date Applied
-            date_str = app.date_applied.strftime("%Y-%m-%d") if app.date_applied else "N/A"
-            self.table.setItem(row, 3, QTableWidgetItem(date_str))
-            
-            # Location
-            self.table.setItem(row, 4, QTableWidgetItem(app.location or "N/A"))
-            
-            # Salary
-            self.table.setItem(row, 5, QTableWidgetItem(app.salary_range or "N/A"))
-            
-            # Archived checkbox
-            archived_item = QTableWidgetItem()
-            archived_item.setCheckState(Qt.Checked if app.is_archived else Qt.Unchecked)
-            archived_item.app_id = app.id
-            self.table.setItem(row, 6, archived_item)
-            
-            # Store app ID in first column for identification
-            self.table.item(row, 0).app_id = app.id
+
+        # Guard against on_item_changed firing (and writing back to the DB /
+        # re-entering refresh) while we populate cells, and disable sorting
+        # so Qt doesn't re-sort rows mid-insert and scramble the app_id
+        # stored on column 0 relative to the other cells in that row.
+        self.updating_item = True
+        was_sorting_enabled = self.table.isSortingEnabled()
+        self.table.setSortingEnabled(False)
+        try:
+            self.table.setRowCount(len(applications))
+
+            for row, app in enumerate(applications):
+                # Company
+                self.table.setItem(row, 0, QTableWidgetItem(app.company_name))
+
+                # Job Title
+                self.table.setItem(row, 1, QTableWidgetItem(app.job_title))
+
+                # Status with color
+                status_item = QTableWidgetItem(app.status.value)
+                status_color = app.get_status_color(app.status)
+                status_item.setBackground(QColor(status_color))
+                self.table.setItem(row, 2, status_item)
+
+                # Date Applied
+                date_str = app.date_applied.strftime("%Y-%m-%d") if app.date_applied else "N/A"
+                self.table.setItem(row, 3, QTableWidgetItem(date_str))
+
+                # Location
+                self.table.setItem(row, 4, QTableWidgetItem(app.location or "N/A"))
+
+                # Salary
+                self.table.setItem(row, 5, QTableWidgetItem(app.salary_range or "N/A"))
+
+                # Archived checkbox
+                archived_item = QTableWidgetItem()
+                archived_item.setCheckState(Qt.Checked if app.is_archived else Qt.Unchecked)
+                archived_item.app_id = app.id
+                self.table.setItem(row, 6, archived_item)
+
+                # Store app ID in first column for identification
+                self.table.item(row, 0).app_id = app.id
+        finally:
+            self.table.setSortingEnabled(was_sorting_enabled)
+            self.updating_item = False
     
     def on_row_clicked(self, item):
         """Handle row click - do nothing, wait for double click."""

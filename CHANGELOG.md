@@ -1,5 +1,44 @@
 # Job Search Tracker - Version History
 
+## [0.7.5] - 2026-07-21
+
+### Bug Fixes
+- **Kanban drag-and-drop**: Dropping a card no longer opens the job detail
+  popup. Root cause: the drop handler was explicitly emitting
+  `application_selected`, which is wired to the modal detail dialog;
+  `application_updated` already refreshes all views on its own.
+- **Table view**: refreshing the table no longer re-triggers `itemChanged`
+  handlers for every cell, which previously caused redundant DB writes and
+  re-entrant refreshes on every load.
+- **Table view**: sorting is now disabled while rows are being populated, so
+  Qt can no longer re-sort mid-insert and desynchronize the stored app ID
+  from the rest of a row.
+- **Job details**: deleting an application now clears the form instead of
+  trying to reload the just-deleted record (which left a stale, unsavable
+  form on screen). Delete now also asks for confirmation before proceeding.
+- **Job details**: creating a new application now saves the "Date Applied"
+  value entered in the form; previously it was silently dropped and the new
+  record's date stayed empty until the next edit.
+- **Calendar view**: refreshing no longer misses clearing highlighted dates
+  from years other than the current one; it now only clears dates it
+  actually marked.
+- **Logout**: "Logout" now returns to the login screen instead of quitting
+  the entire application.
+
+### Security
+- Passwords are now hashed with a per-user random salt using
+  PBKDF2-HMAC-SHA256 (200,000 iterations) instead of unsalted SHA-256.
+  Existing accounts are verified against their legacy hash and
+  transparently upgraded to the new format on next successful login - no
+  action needed, no passwords reset.
+
+### Notes
+- Consolidated password verification into `DatabaseManager.verify_password`
+  so authentication logic isn't split across the login dialog and the user
+  model.
+
+---
+
 ## [0.7.4] - 2026-07-16 16:50
 
 ### Features Added

@@ -27,8 +27,8 @@ class DatabaseManager:
         """Get a new database session."""
         return self.Session()
     
-    def add_application(self, company_name, job_title, job_url=None, status=None, 
-                       salary_range=None, location=None, contact_name=None, 
+    def add_application(self, company_name, job_title, job_url=None, status=None,
+                       date_applied=None, salary_range=None, location=None, contact_name=None,
                        contact_email=None, contact_phone=None, notes=None, user_id=None):
         """Add a new job application."""
         session = self.get_session()
@@ -39,6 +39,7 @@ class DatabaseManager:
                 job_title=job_title,
                 job_url=job_url,
                 status=status or ApplicationStatus.IDENTIFIED,
+                date_applied=date_applied,
                 salary_range=salary_range,
                 location=location,
                 contact_name=contact_name,
@@ -154,6 +155,24 @@ class DatabaseManager:
                 user_username = user.username
                 return {'id': user_id, 'username': user_username}
             return None
+        finally:
+            session.close()
+
+    def verify_password(self, username, password):
+        """Verify a user's password in a single session.
+
+        If the account still has a legacy unsalted hash, User.verify_password
+        upgrades it in-place, so a successful verify here commits that upgrade.
+        """
+        session = self.get_session()
+        try:
+            user = session.query(User).filter(User.username == username).first()
+            if not user:
+                return False
+            if user.verify_password(password):
+                session.commit()
+                return True
+            return False
         finally:
             session.close()
     
