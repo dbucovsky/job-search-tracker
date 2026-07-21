@@ -44,12 +44,15 @@ class JobApplication(Base):
     
     @staticmethod
     def get_status_color(status):
-        """Get color for status."""
+        """Get the accent color for a status. Each status has a unique,
+        unambiguous color so it can be scanned at a glance in both the
+        table and kanban board (previously Applied and Offer shared the
+        same green)."""
         color_map = {
-            ApplicationStatus.IDENTIFIED: "#FFEB3B",  # Yellow
-            ApplicationStatus.APPLIED: "#4CAF50",     # Green
-            ApplicationStatus.INTERVIEWING: "#FF9800", # Orange
-            ApplicationStatus.OFFER: "#4CAF50",       # Green
-            ApplicationStatus.REJECTED: "#F44336",    # Red
+            ApplicationStatus.IDENTIFIED: "#94A3B8",   # Slate
+            ApplicationStatus.APPLIED: "#2F6FED",      # Blue
+            ApplicationStatus.INTERVIEWING: "#F59E0B", # Amber
+            ApplicationStatus.OFFER: "#16A34A",        # Green
+            ApplicationStatus.REJECTED: "#EF4444",     # Red
         }
         return color_map.get(status, "#FFFFFF")

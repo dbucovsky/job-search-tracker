@@ -32,12 +32,11 @@ class StatusDelegate(QStyledItemDelegate):
 
 class TableView(QWidget):
     """Display job applications in table format."""
-    
+
     application_selected = pyqtSignal(int)  # Signal when an application is selected
     deselect_requested = pyqtSignal()  # Signal to deselect current application
     application_updated = pyqtSignal()  # Signal when application data changes
-    new_record_requested = pyqtSignal()  # Signal to create new record
-    
+
     def __init__(self, db_manager, user_id=None):
         super().__init__()
         self.db_manager = db_manager
@@ -45,54 +44,52 @@ class TableView(QWidget):
         self.show_archived = False  # Default to hiding archived
         self.updating_item = False  # Flag to prevent recursive updates
         self.init_ui()
-    
+
     def init_ui(self):
         """Initialize table view UI."""
         layout = QVBoxLayout()
-        
+        layout.setContentsMargins(12, 12, 12, 12)
+
         # Filter controls
         filter_layout = QHBoxLayout()
         self.show_archived_checkbox = QCheckBox("Show Archived")
         self.show_archived_checkbox.stateChanged.connect(self.on_show_archived_toggled)
         filter_layout.addWidget(self.show_archived_checkbox)
-        
-        new_btn = QPushButton("New Application")
-        new_btn.clicked.connect(self.new_record_requested.emit)
-        filter_layout.addWidget(new_btn)
-        
+
         deselect_btn = QPushButton("Deselect Job")
         deselect_btn.clicked.connect(self.deselect_requested.emit)
         filter_layout.addWidget(deselect_btn)
-        
+
         filter_layout.addStretch()
         layout.addLayout(filter_layout)
-        
+
         # Create table
         self.table = QTableWidget()
-        self.table.setColumnCount(8)
+        self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
-            "Company", "Job Title", "Status", "Date Applied", "Location", "Salary", "Archived", "Actions"
+            "Company", "Job Title", "Status", "Date Applied", "Location", "Salary", "Archived"
         ])
-        self.table.setColumnWidth(0, 120)
-        self.table.setColumnWidth(1, 150)
-        self.table.setColumnWidth(2, 100)
+        self.table.setColumnWidth(0, 140)
+        self.table.setColumnWidth(1, 170)
+        self.table.setColumnWidth(2, 120)
         self.table.setColumnWidth(3, 100)
-        self.table.setColumnWidth(4, 100)
-        self.table.setColumnWidth(5, 80)
+        self.table.setColumnWidth(4, 120)
+        self.table.setColumnWidth(5, 100)
         self.table.setColumnWidth(6, 80)
-        self.table.setColumnWidth(7, 80)
-        
+
         # Set status column delegate to show dropdown
         self.table.setItemDelegateForColumn(2, StatusDelegate(self))
-        
-        # Enable sorting
+
+        # Enable sorting and alternating row colors for readability
         self.table.setSortingEnabled(True)
+        self.table.setAlternatingRowColors(True)
+        self.table.verticalHeader().setVisible(False)
         self.table.itemChanged.connect(self.on_item_changed)
         self.table.itemClicked.connect(self.on_row_clicked)
         self.table.itemDoubleClicked.connect(self.on_row_double_clicked)
-        
+
         layout.addWidget(self.table)
-        
+
         self.setLayout(layout)
         self.refresh_table()
     
@@ -126,10 +123,12 @@ class TableView(QWidget):
                 # Job Title
                 self.table.setItem(row, 1, QTableWidgetItem(app.job_title))
 
-                # Status with color
+                # Status with color (white text - the palette uses
+                # saturated colors that need contrast, unlike the old pastels)
                 status_item = QTableWidgetItem(app.status.value)
                 status_color = app.get_status_color(app.status)
                 status_item.setBackground(QColor(status_color))
+                status_item.setForeground(QColor("#FFFFFF"))
                 self.table.setItem(row, 2, status_item)
 
                 # Date Applied
@@ -155,13 +154,15 @@ class TableView(QWidget):
             self.updating_item = False
     
     def on_row_clicked(self, item):
-        """Handle row click - do nothing, wait for double click."""
-        pass
-    
+        """Handle row click - preview the application in the detail panel."""
+        app_id_item = self.table.item(item.row(), 0)
+        if app_id_item and hasattr(app_id_item, 'app_id'):
+            self.application_selected.emit(app_id_item.app_id)
+
     def on_row_double_clicked(self, item):
-        """Handle row double click to open detail popup."""
-        app_id = self.table.item(item.row(), 0).app_id
-        self.application_selected.emit(app_id)
+        """Handle row double click - same as single click now that the
+        detail panel is persistent rather than a popup."""
+        self.on_row_clicked(item)
     
     def on_item_changed(self, item):
         """Handle item change - for archive checkbox and editable fields."""

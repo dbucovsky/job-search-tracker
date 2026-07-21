@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QApplication
 from src.database.db_manager import DatabaseManager
 from src.ui.main_window import MainWindow
 from src.ui.login_dialog import LoginDialog
+from src.ui.theme import apply_theme
 
 
 def main():
@@ -15,6 +16,7 @@ def main():
 
     # Create Qt application
     app = QApplication(sys.argv)
+    apply_theme(app)
 
     # Loop so that "Logout" returns to the login screen instead of quitting
     # the whole application.

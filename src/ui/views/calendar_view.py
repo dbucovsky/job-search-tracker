@@ -5,55 +5,60 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QCalendarWidget, QLabel, QList
 from PyQt5.QtCore import QDate, pyqtSignal
 from PyQt5.QtGui import QTextCharFormat, QColor
 from datetime import datetime
+from src.ui import theme
+
+JOB_DATE_BG = QColor("#FDE68A")   # Soft amber - a date with an application
+JOB_DATE_FG = QColor("#78350F")   # Dark amber text for contrast
+TODAY_COLOR = QColor(theme.ACCENT)
 
 
 class CalendarView(QWidget):
     """Display job applications in calendar format."""
-    
+
     date_selected = pyqtSignal(QDate)
     application_selected = pyqtSignal(int)  # Signal when an application is selected
     deselect_requested = pyqtSignal()  # Signal to deselect current application
-    new_record_requested = pyqtSignal()  # Signal to create new record
-    
+
     def __init__(self, db_manager, user_id=None):
         super().__init__()
         self.db_manager = db_manager
         self.user_id = user_id
         self.marked_dates = {}  # Track marked dates for highlighting
         self.init_ui()
-    
+
     def init_ui(self):
         """Initialize calendar view UI."""
         layout = QVBoxLayout()
-        
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(8)
+
         # Calendar
         self.calendar = QCalendarWidget()
         self.calendar.clicked.connect(self.on_date_selected)
-        
+
         # Today will be highlighted with underline and bold - no background to avoid conflicts
-        
+
         layout.addWidget(self.calendar)
-        
+
         # Date info
         self.date_info_label = QLabel("Select a date to view applications")
+        self.date_info_label.setProperty("subheading", True)
         layout.addWidget(self.date_info_label)
-        
+
         # List widget for applications on selected date
         self.applications_list = QListWidget()
+        self.applications_list.itemClicked.connect(self.on_application_clicked)
         self.applications_list.itemDoubleClicked.connect(self.on_application_clicked)
         layout.addWidget(self.applications_list)
-        
+
         # Deselect button
         button_layout = QHBoxLayout()
-        new_btn = QPushButton("New Application")
-        new_btn.clicked.connect(self.new_record_requested.emit)
-        button_layout.addWidget(new_btn)
         self.deselect_btn = QPushButton("Deselect Job")
         self.deselect_btn.clicked.connect(self.deselect_requested.emit)
         button_layout.addStretch()
         button_layout.addWidget(self.deselect_btn)
         layout.addLayout(button_layout)
-        
+
         self.setLayout(layout)
         self.refresh_highlighting()
     
@@ -64,17 +69,17 @@ class CalendarView(QWidget):
             today_date = QDate.currentDate()
             self.marked_dates = {}  # Reset marked dates
             
-            # Create format for job dates - YELLOW background
+            # Create format for job dates - soft amber background
             job_format = QTextCharFormat()
-            job_format.setBackground(QColor("#FFFF00"))  # Bright yellow
-            job_format.setForeground(QColor("#000000"))  # Black text
-            
-            # Create format for today - BOLD and UNDERLINE (no background)
+            job_format.setBackground(JOB_DATE_BG)
+            job_format.setForeground(JOB_DATE_FG)
+
+            # Create format for today - bold and underlined in the accent color
             today_format = QTextCharFormat()
             today_format.setFontWeight(900)  # Extra bold
-            today_format.setUnderlineStyle(1)  # Underline with dark line
-            today_format.setUnderlineColor(QColor("#000000"))  # Dark underline
-            today_format.setForeground(QColor("#000000"))  # Black text
+            today_format.setUnderlineStyle(1)  # Underline
+            today_format.setUnderlineColor(TODAY_COLOR)
+            today_format.setForeground(TODAY_COLOR)
             
             # Collect all job dates
             for app in applications:
@@ -100,11 +105,11 @@ class CalendarView(QWidget):
                             # If it's today, combine today and job formatting
                             if qdate == today_date:
                                 combined_format = QTextCharFormat()
-                                combined_format.setBackground(QColor("#FFFF00"))  # Yellow background for jobs
-                                combined_format.setForeground(QColor("#000000"))  # Black text
+                                combined_format.setBackground(JOB_DATE_BG)
+                                combined_format.setForeground(JOB_DATE_FG)
                                 combined_format.setFontWeight(900)  # Bold from today format
                                 combined_format.setUnderlineStyle(1)  # Underline from today format
-                                combined_format.setUnderlineColor(QColor("#000000"))  # Dark underline
+                                combined_format.setUnderlineColor(TODAY_COLOR)
                                 self.calendar.setDateTextFormat(qdate, combined_format)
                             else:
                                 self.calendar.setDateTextFormat(qdate, job_format)

@@ -30,7 +30,9 @@ class DatabaseManager:
     def add_application(self, company_name, job_title, job_url=None, status=None,
                        date_applied=None, salary_range=None, location=None, contact_name=None,
                        contact_email=None, contact_phone=None, notes=None, user_id=None):
-        """Add a new job application."""
+        """Add a new job application. Returns the new row's id (not the ORM
+        object - it would be detached once the session below closes, and
+        accessing its attributes afterward raises DetachedInstanceError)."""
         session = self.get_session()
         try:
             from src.models.job_application import ApplicationStatus
@@ -50,7 +52,7 @@ class DatabaseManager:
             )
             session.add(app)
             session.commit()
-            return app
+            return app.id
         finally:
             session.close()
     

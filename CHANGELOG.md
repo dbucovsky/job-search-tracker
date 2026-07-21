@@ -1,5 +1,62 @@
 # Job Search Tracker - Version History
 
+## [0.8.0] - 2026-07-21
+
+### Look & Feel
+- Introduced a centralized light, modern theme (`src/ui/theme.py`) applied
+  app-wide, replacing the old default-gray Qt look and the scattered
+  per-widget inline stylesheets: flat buttons with hover/pressed states,
+  rounded inputs with an accent focus ring, modern tab/table/calendar/menu
+  styling, and thin scrollbars.
+- **Fixed**: the login screen, the tab strip's inactive tabs, and the job
+  detail panel could render with a black/dark background and gray/dark text
+  on top - unreadable. Root cause: several stylesheet rules used
+  `background-color: transparent` (the generic `QWidget` fallback, the
+  unselected-tab background, scroll area backgrounds) intending "show
+  whatever's behind me," plus a selector typo (`QFrame#detailPanel`) that
+  never matched the actual widget (a `QWidget`) so its background was never
+  forced to white. On top of that, `apply_theme()` never set an explicit
+  `QPalette`. All three combined so certain regions fell through to a dark
+  color instead of the intended light one. Fixed by: correcting the
+  selector, forcing the Fusion style plus a fully-specified light
+  `QPalette`, and replacing every `transparent` background in the
+  stylesheet with an explicit opaque light color (keeping `QLabel`/
+  `QCheckBox` transparent on purpose, since those should blend into
+  whatever they sit on rather than paint their own box). The app should now
+  render the same light theme everywhere regardless of OS theme settings.
+- Application status now has five distinct, unambiguous colors (previously
+  Applied and Offer shared the same green); used consistently in the table
+  and kanban board.
+- Kanban cards and columns redesigned: rounded cards with a status-colored
+  accent stripe, a colored status dot plus item-count pill on each column
+  header, and an accent-colored drop highlight while dragging.
+- Table view gets alternating row colors and a cleaner header.
+- Job detail form reorganized into clearly labeled sections (Position,
+  Status & Dates, Contact, Notes) using aligned form rows and placeholder
+  text in every field, with Save styled as the primary action and Delete
+  styled as a clear warning action.
+- Login and About dialogs restyled to match, with a subtitle on the login
+  screen and Enter-to-submit on both the login and register forms.
+
+### Functional / UX Changes
+- **Job details are now a persistent side panel** instead of a modal popup
+  dialog: selecting an application in any view (table row, calendar entry,
+  kanban card, or drag-and-drop) loads it into the panel in place, without
+  interrupting whatever view you're working in.
+- Added a toolbar with **New Application** and **Refresh** actions, replacing
+  the three separate "New Application" buttons that were previously
+  duplicated across the Table, Calendar, and Kanban views.
+- Table rows now preview into the detail panel on a single click (previously
+  required a double click and opened a popup).
+- Kanban drag-and-drop now shows the card's updated details in the panel
+  after a status change, since doing so no longer pops up a dialog.
+- Fixed: the "Deselect Job" button in the table view didn't actually clear
+  the detail form - it only cleared internal selection state. It now also
+  clears the panel.
+- Removed the unused, always-empty "Actions" column from the table view.
+
+---
+
 ## [0.7.5] - 2026-07-21
 
 ### Bug Fixes
